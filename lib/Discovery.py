@@ -29,7 +29,13 @@ def getAddressAndControlPath(xml):
         urlBase = xUrlBase[0].firstChild.data
         xControlUrl = xml.getElementsByTagName('yamaha:X_yxcControlURL')
         cotrolUrl = xControlUrl[0].firstChild.data
-        return (urlBase, cotrolUrl)
+        xName = xml.getElementsByTagName('friendlyName')
+        name = xName[0].firstChild.data
+        return {
+            'name': name,
+            'urlBase': urlBase,
+            'controlUrl': cotrolUrl
+        }
     except:
         return None
 
@@ -58,9 +64,9 @@ def getDescription(response):
     )
 
 
-def discoverDevices():
+def discoverDevices(timeout):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    s.settimeout(2)
+    s.settimeout(timeout)
     s.sendto(getMSearchMessage(), ('239.255.255.250', 1900))
     devices = []
     try:
@@ -74,8 +80,8 @@ def discoverDevices():
     return devices
 
 
-def discoverMusicCastDevices():
-    devices = discoverDevices()
+def discoverMusicCastDevices(timeout=2):
+    devices = discoverDevices(timeout)
     descriptions = map(lambda device: device[1], devices)
     xmls = map(getXml, descriptions)
     correct = filter(checkCorrectManufacturer, xmls)
