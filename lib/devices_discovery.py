@@ -78,7 +78,8 @@ def __discover_devices(timeout):
         while True:
             data, (addr) = sendto_socket.recvfrom(65507)
             description, model_name = __get_description(data.decode("utf-8"))
-            devices.append((addr, description, model_name))
+            if(description is not None and model_name is not None):
+                devices.append((addr, description, model_name))
     except socket.timeout:
         pass
 
