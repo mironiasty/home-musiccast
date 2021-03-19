@@ -36,8 +36,8 @@ def __get_address_and_control_path(xml):
         name = x_name[0].firstChild.data
         return {
             'name': name,
-            'urlBase': url_base,
-            'controlUrl': cotrol_url
+            'base_url': url_base,
+            'control_url': cotrol_url
         }
     except DOMException:
         return None

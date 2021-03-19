@@ -1,10 +1,12 @@
-import requests
-import json
+'''
+Just API demo
+'''
 
-musiccastIP = "192.168.7.x"
-getDeviceInfoPath = "/YamahaExtendedControl/v1/system/getDeviceInfo"
-response = requests.get("http://" + musiccastIP + getDeviceInfoPath)
-print(response.json()['model_name'])
+import pprint
+from lib.devices_discovery import discover_music_cast_devices
+from lib.device_info import DeviceInfo
 
-# x = json.load(response.json())
-# print(x)
+
+for device in discover_music_cast_devices(4):
+    device_info = DeviceInfo(device['base_url'], device['control_url'])
+    pprint.pprint(device_info.get_device_info())

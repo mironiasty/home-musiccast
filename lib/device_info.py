@@ -15,11 +15,16 @@ class DeviceInfo:
 
     device_addressa = ""
 
-    def __init__(self, deviceAddress):
-        self.device_addressa = deviceAddress
+    def __init__(self, base_url, control_url='/YamahaExtendedControl/v1/'):
+        self.base_url = base_url
+        self.control_url = control_url
+
+    def __api(self, endpoint):
+        return call_api(self.base_url,
+                        endpoint, self.control_url)
 
     def get_device_info(self):
-        return call_api(self.device_addressa, DeviceInfo.ENDPOINTS['getDeviceInfo'])
+        return self.__api(DeviceInfo.ENDPOINTS['getDeviceInfo'])
 
     def get_features(self):
-        return call_api(self.device_addressa, DeviceInfo.ENDPOINTS['getFeatures'])
+        return self.__api(DeviceInfo.ENDPOINTS['getFeatures'])
