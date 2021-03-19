@@ -1,5 +1,5 @@
 
-from .callApi import callApi
+from .call_api import call_api
 
 
 class DeviceInfo:
@@ -14,7 +14,7 @@ class DeviceInfo:
         self.deviceAddress = deviceAddress
 
     def getDeviceInfo(self):
-        return callApi(self.deviceAddress, DeviceInfo.ENDPOINTS['getDeviceInfo'])
+        return call_api(self.deviceAddress, DeviceInfo.ENDPOINTS['getDeviceInfo'])
 
     def getgetFeatures(self):
-        return callApi(self.deviceAddress, DeviceInfo.ENDPOINTS['getFeatures'])
+        return call_api(self.deviceAddress, DeviceInfo.ENDPOINTS['getFeatures'])
