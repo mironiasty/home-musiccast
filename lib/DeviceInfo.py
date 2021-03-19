@@ -1,20 +1,25 @@
-
+"""
+Device Info class
+"""
 from .call_api import call_api
 
 
 class DeviceInfo:
+    '''
+    Device info -> set of function to get information about single Music Cast device
+    '''
     ENDPOINTS = {
         'getDeviceInfo': 'system/getDeviceInfo',
         'getFeatures': 'system/getFeatures'
     }
 
-    deviceAddress = ""
+    device_addressa = ""
 
     def __init__(self, deviceAddress):
-        self.deviceAddress = deviceAddress
+        self.device_addressa = deviceAddress
 
-    def getDeviceInfo(self):
-        return call_api(self.deviceAddress, DeviceInfo.ENDPOINTS['getDeviceInfo'])
+    def get_device_info(self):
+        return call_api(self.device_addressa, DeviceInfo.ENDPOINTS['getDeviceInfo'])
 
-    def getgetFeatures(self):
-        return call_api(self.deviceAddress, DeviceInfo.ENDPOINTS['getFeatures'])
+    def get_features(self):
+        return call_api(self.device_addressa, DeviceInfo.ENDPOINTS['getFeatures'])

@@ -1,15 +1,19 @@
+
+'''
+Discovery related methods
+'''
 import socket
 import re
-from xml.dom import minidom
+from xml.dom import minidom, DOMException
 import requests
 
 
-def getXml(uri):
+def __get_xml(uri):
     response = requests.get(uri)
     return minidom.parseString(response.text)
 
 
-def checkCorrectManufacturer(xml):
+def __check_correct_manufacturer(xml):
     yamaha = "Yamaha Corporation"
     items = xml.getElementsByTagName('manufacturer')
     try:
@@ -17,31 +21,30 @@ def checkCorrectManufacturer(xml):
         manufacturer = items[0].firstChild.data
         if manufacturer == yamaha:
             return True
-        else:
-            return False
-    except:
+        return False
+    except DOMException:
         return False
 
 
-def getAddressAndControlPath(xml):
+def __get_address_and_control_path(xml):
     try:
-        xUrlBase = xml.getElementsByTagName('yamaha:X_URLBase')
-        urlBase = xUrlBase[0].firstChild.data
-        xControlUrl = xml.getElementsByTagName('yamaha:X_yxcControlURL')
-        cotrolUrl = xControlUrl[0].firstChild.data
-        xName = xml.getElementsByTagName('friendlyName')
-        name = xName[0].firstChild.data
+        x_url_base = xml.getElementsByTagName('yamaha:X_URLBase')
+        url_base = x_url_base[0].firstChild.data
+        x_control_url = xml.getElementsByTagName('yamaha:X_yxcControlURL')
+        cotrol_url = x_control_url[0].firstChild.data
+        x_name = xml.getElementsByTagName('friendlyName')
+        name = x_name[0].firstChild.data
         return {
             'name': name,
-            'urlBase': urlBase,
-            'controlUrl': cotrolUrl
+            'urlBase': url_base,
+            'controlUrl': cotrol_url
         }
-    except:
+    except DOMException:
         return None
 
 
-def getMSearchMessage():
-    msg = \
+def __get_msearch_message():
+    message = \
         'M-SEARCH * HTTP/1.1\r\n' \
         'HOST:{host}:{port}\r\n' \
         'ST:{search_type}\r\n' \
@@ -52,38 +55,40 @@ def getMSearchMessage():
             port="1900",
             search_type="urn:schemas-upnp-org:device:MediaRenderer:1"
         )
-    return bytes(msg, "utf-8")
+    return bytes(message, "utf-8")
 
 
-def getDescription(response):
-    matchDescription = re.findall(r"Location: (\S+)", response, re.MULTILINE)
-    matchModelName = re.findall(r"X-ModelName: (\S+)", response, re.MULTILINE)
+def __get_description(response):
+    match_description = re.findall(r"Location: (\S+)", response, re.MULTILINE)
+    match_model_name = re.findall(
+        r"X-ModelName: (\S+)", response, re.MULTILINE)
     return (
-        matchDescription[0] if matchDescription else None,
-        matchModelName[0] if matchModelName else None
+        match_description[0] if match_description else None,
+        match_model_name[0] if match_model_name else None
     )
 
 
-def discoverDevices(timeout):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    s.settimeout(timeout)
-    s.sendto(getMSearchMessage(), ('239.255.255.250', 1900))
+def __discover_devices(timeout):
+    sendto_socket = socket.socket(
+        socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    sendto_socket.settimeout(timeout)
+    sendto_socket.sendto(__get_msearch_message(), ('239.255.255.250', 1900))
     devices = []
     try:
         while True:
-            data, (addr, port) = s.recvfrom(65507)
-            description, modelName = getDescription(data.decode("utf-8"))
-            devices.append((addr, description, modelName))
+            data, (addr) = sendto_socket.recvfrom(65507)
+            description, model_name = __get_description(data.decode("utf-8"))
+            devices.append((addr, description, model_name))
     except socket.timeout:
         pass
 
     return devices
 
 
-def discoverMusicCastDevices(timeout=2):
-    devices = discoverDevices(timeout)
+def discover_music_cast_devices(timeout=2):
+    devices = __discover_devices(timeout)
     descriptions = map(lambda device: device[1], devices)
-    xmls = map(getXml, descriptions)
-    correct = filter(checkCorrectManufacturer, xmls)
-    data = map(getAddressAndControlPath, correct)
+    xmls = map(__get_xml, descriptions)
+    correct = filter(__check_correct_manufacturer, xmls)
+    data = map(__get_address_and_control_path, correct)
     return data
