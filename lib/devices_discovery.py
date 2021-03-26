@@ -93,3 +93,9 @@ def discover_music_cast_devices(timeout=2):
     correct = filter(__check_correct_manufacturer, xmls)
     data = map(__get_address_and_control_path, correct)
     return data
+
+
+def get_device_by_name(name: str, timeout=2):
+    devices = discover_music_cast_devices(timeout)
+    device = next((d for d in devices if d['name'] == name), None)
+    return device
